@@ -506,7 +506,7 @@ public class ManagerImpl implements Manager
       {
          for(ObserverMethod observer : extension.getObservers())
          {
-            if(Reflections.getType(observer.getType()).isAssignableFrom(eventType) && !Reflections.isType(observer.getType(), EventContext.class))
+            if(eventType.isAssignableFrom(Reflections.getType(observer.getType())) && !Reflections.isType(observer.getType(), EventContext.class))
             {
                observers.add(observer);
             }
@@ -525,7 +525,7 @@ public class ManagerImpl implements Manager
          {
             if(Reflections.isType(observer.getType(), EventContext.class))
             {
-               if(Reflections.getType(observer.getType()).isAssignableFrom(eventType))
+               if(eventType.isAssignableFrom(Reflections.getType(observer.getType())))
                {
                   observers.add(observer);
                }
