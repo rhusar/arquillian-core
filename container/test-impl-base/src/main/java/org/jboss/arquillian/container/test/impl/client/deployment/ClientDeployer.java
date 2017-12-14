@@ -57,11 +57,11 @@ public class ClientDeployer implements Deployer {
      */
     @Override
     public void deploy(String name) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -91,11 +91,11 @@ public class ClientDeployer implements Deployer {
      */
     @Override
     public void undeploy(String name) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -122,7 +122,7 @@ public class ClientDeployer implements Deployer {
 
     @Override
     public InputStream getDeployment(String name) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
@@ -137,6 +137,38 @@ public class ClientDeployer implements Deployer {
             return archive.as(ZipExporter.class).exportAsInputStream();
         } else {
             return new ByteArrayInputStream(description.getDescriptor().exportAsString().getBytes());
+        }
+    }
+
+    private volatile ContainerRegistry resolvedContainerRegistry;
+
+    protected ContainerRegistry getContainerRegistry() {
+        if (resolvedContainerRegistry != null) {
+            return resolvedContainerRegistry;
+        } else {
+            synchronized (this) {
+                if (resolvedContainerRegistry != null) {
+                    return resolvedContainerRegistry;
+                }
+                resolvedContainerRegistry = this.getContainerRegistry();
+                return resolvedContainerRegistry;
+            }
+        }
+    }
+
+    private volatile DeploymentScenario resolvedDeploymentScenario;
+
+    protected DeploymentScenario getDeploymentScenario() {
+        if (resolvedDeploymentScenario != null) {
+            return resolvedDeploymentScenario;
+        } else {
+            synchronized (this) {
+                if (resolvedDeploymentScenario != null) {
+                    return resolvedDeploymentScenario;
+                }
+                resolvedDeploymentScenario = this.getDeploymentScenario();
+                return resolvedDeploymentScenario;
+            }
         }
     }
 }

@@ -58,12 +58,12 @@ public class ClientContainerController implements ContainerController {
 
     @Override
     public void start(String containerQualifier) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
 
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -84,7 +84,7 @@ public class ClientContainerController implements ContainerController {
 
         log.info("Manual starting of a server instance");
 
-        event.fire(new StartContainer(container));
+        getContainerControllerEvent().fire(new StartContainer(container));
 
         for (Deployment d : managedDeployments) {
             if (d.getDescription().managed() && "custom".equalsIgnoreCase(
@@ -96,19 +96,19 @@ public class ClientContainerController implements ContainerController {
             if (!d.isDeployed()) {
                 log.info("Automatic deploying of the managed deployment with name " + d.getDescription().getName() +
                     " for the container with name " + container.getName());
-                event.fire(new DeployDeployment(container, d));
+                getContainerControllerEvent().fire(new DeployDeployment(container, d));
             }
         }
     }
 
     @Override
     public void start(String containerQualifier, Map<String, String> config) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
 
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -134,26 +134,26 @@ public class ClientContainerController implements ContainerController {
         log.info("Manual starting of a server instance with overridden configuration. New configuration: " +
             container.getContainerConfiguration().getContainerProperties());
 
-        event.fire(new SetupContainer(container));
-        event.fire(new StartContainer(container));
+        getContainerControllerEvent().fire(new SetupContainer(container));
+        getContainerControllerEvent().fire(new StartContainer(container));
 
         for (Deployment d : managedDeployments) {
             if (!d.isDeployed()) {
                 log.info("Automatic deploying of the managed deployment with name " + d.getDescription().getName() +
                     " for the container with name " + container.getName());
-                event.fire(new DeployDeployment(container, d));
+                getContainerControllerEvent().fire(new DeployDeployment(container, d));
             }
         }
     }
 
     @Override
     public void stop(String containerQualifier) {
-        DeploymentScenario scenario = deploymentScenario.get();
+        DeploymentScenario scenario = this.getDeploymentScenario();
         if (scenario == null) {
             throw new IllegalArgumentException("No deployment scenario in context");
         }
 
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -176,18 +176,18 @@ public class ClientContainerController implements ContainerController {
             if (d.isDeployed()) {
                 log.info("Automatic undeploying of the managed deployment with name " + d.getDescription().getName() +
                     " from the container with name " + container.getName());
-                event.fire(new UnDeployDeployment(container, d));
+                getContainerControllerEvent().fire(new UnDeployDeployment(container, d));
             }
         }
 
         log.info("Manual stopping of a server instance");
 
-        event.fire(new StopContainer(container));
+        getContainerControllerEvent().fire(new StopContainer(container));
     }
 
     @Override
     public void kill(String containerQualifier) {
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -206,12 +206,12 @@ public class ClientContainerController implements ContainerController {
 
         log.info("Hard killing of a server instance");
 
-        event.fire(new KillContainer(container));
+        getContainerControllerEvent().fire(new KillContainer(container));
     }
 
     @Override
     public boolean isStarted(String containerQualifier) {
-        ContainerRegistry registry = containerRegistry.get();
+        ContainerRegistry registry = this.getContainerRegistry();
         if (registry == null) {
             throw new IllegalArgumentException("No container registry in context");
         }
@@ -248,11 +248,35 @@ public class ClientContainerController implements ContainerController {
         return event;
     }
 
-    protected Instance<ContainerRegistry> getContainerRegistry() {
-        return containerRegistry;
+    private volatile ContainerRegistry resolvedContainerRegistry;
+
+    protected ContainerRegistry getContainerRegistry() {
+        if (resolvedContainerRegistry != null) {
+            return resolvedContainerRegistry;
+        } else {
+            synchronized (this) {
+                if (resolvedContainerRegistry != null) {
+                    return resolvedContainerRegistry;
+                }
+                resolvedContainerRegistry = containerRegistry.get();
+                return resolvedContainerRegistry;
+            }
+        }
     }
 
-    protected Instance<DeploymentScenario> getDeploymentScenario() {
-        return deploymentScenario;
+    private volatile DeploymentScenario resolvedDeploymentScenario;
+
+    protected DeploymentScenario getDeploymentScenario() {
+        if (resolvedDeploymentScenario != null) {
+            return resolvedDeploymentScenario;
+        } else {
+            synchronized (this) {
+                if (resolvedDeploymentScenario != null) {
+                    return resolvedDeploymentScenario;
+                }
+                resolvedDeploymentScenario = deploymentScenario.get();
+                return resolvedDeploymentScenario;
+            }
+        }
     }
 }
