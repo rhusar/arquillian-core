@@ -38,12 +38,12 @@ jobs:
       - name: Build with Maven Java ${{ matrix.java }} - ${{ matrix.os }}
         run:  |
           ./mvnw -V clean install -U -B -fae '-Pwildfly' '-T1' '-Pintegration-tests'
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.java }}-wildfly-surefire-reports
           path: '**/surefire-reports/*'
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.java }}-wildfly-server-logs
@@ -74,12 +74,12 @@ jobs:
       - name: Build with Maven Java ${{ matrix.java }} - ${{ matrix.os }}
         run:  |
           ./mvnw -V clean install -U -B -fae '-Ppayara' '-T1' '-Pintegration-tests'
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.java }}-payara-surefire-reports
           path: '**/surefire-reports/*'
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ${{ matrix.os }}-${{ matrix.java }}-payara-server-logs
