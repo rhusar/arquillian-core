@@ -113,6 +113,7 @@ public class ContainerDeployController {
         });
     }
 
+    @SuppressWarnings("deprecation") // Suppress DeployableContainer#deploy(org.jboss.shrinkwrap.descriptor.api.Descriptor)
     public void deploy(@Observes final DeployDeployment event) throws Exception {
         executeOperation(new Callable<Void>() {
             @Inject
@@ -136,10 +137,10 @@ public class ContainerDeployController {
                 Deployment deployment = event.getDeployment();
                 DeploymentDescription deploymentDescription = deployment.getDescription();
 
-            /*
-             * TODO: should the DeploymentDescription producer some how be automatically registered ?
-             * Or should we just 'know' who is the first one to create the context
-             */
+                /*
+                 * TODO: should the DeploymentDescription producer some how be automatically registered ?
+                 * Or should we just 'know' who is the first one to create the context
+                 */
                 deploymentDescriptionProducer.set(deploymentDescription);
                 deploymentProducer.set(deployment);
 
@@ -165,6 +166,7 @@ public class ContainerDeployController {
         });
     }
 
+    @SuppressWarnings("deprecation") // Suppress DeployableContainer#deploy(org.jboss.shrinkwrap.descriptor.api.Descriptor)
     public void undeploy(@Observes final UnDeployDeployment event) throws Exception {
         executeOperation(new Callable<Void>() {
             @Inject
