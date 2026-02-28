@@ -219,27 +219,6 @@
           </plugin>
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <configuration>
-              <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
-              <docletArtifact>
-                <groupId>nl.talsmasoftware</groupId>
-                <artifactId>umldoclet</artifactId>
-                <version>2.0.18</version>
-              </docletArtifact>
-              <useStandardDocletOptions>true</useStandardDocletOptions>
-              <charset>UTF-8</charset>
-              <encoding>UTF-8</encoding>
-              <docencoding>UTF-8</docencoding>
-              <breakiterator>true</breakiterator>
-              <version>true</version>
-              <author>true</author>
-              <keywords>true</keywords>
-              <additionalOptions>
-                <additionalOption>-sourceclasspath ${project.build.outputDirectory}</additionalOption>
-              </additionalOptions>
-              <stylesheetfile>${project.parent.parent.basedir}/javadoc/stylesheet.css</stylesheetfile>
-              <javadocDirectory>${project.parent.parent.basedir}/javadoc</javadocDirectory>
-            </configuration>
             <executions>
               <execution>
                 <id>attach-javadocs</id>
