@@ -5,8 +5,8 @@
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
-    <version>51</version>
-    <relativePath />
+    <version>52</version>
+    <relativePath/>
   </parent>
 
   <!-- Model Information -->
@@ -28,10 +28,28 @@
   <properties>
     <!-- jboss-parent overrides -->
     <maven.compiler.release>8</maven.compiler.release>
-    <nexus.repository.release>arquillian</nexus.repository.release>
-    <nexus.staging.tag>arquillian-core-${project.version}</nexus.staging.tag>
-    <!-- temporary plugin version bump to remove after jboss-parent upgrade -->
-    <version.nxrm3.plugin>1.0.12</version.nxrm3.plugin>
+    <jdk.min.version>${maven.compiler.release}</jdk.min.version>
+
+    <!-- Central Publishing Plugin -->
+    <version.central.publishing.maven.plugin>0.10.0</version.central.publishing.maven.plugin>
+
+    <!-- maven-release-plugin configuration -->
+    <autoVersionSubmodules>true</autoVersionSubmodules>
+    <releaseProfiles>central-release</releaseProfiles>
+    <signTag>true</signTag>
+    <tagNameFormat>@{project.version}</tagNameFormat>
+    <arguments>-DskipItTests=true -Dcentral.autoPublish=${central.autoPublish} -Dcentral.waitUntil=${central.waitUntil}</arguments>
+    <pushChanges>true</pushChanges>
+    <localCheckout>true</localCheckout>
+
+    <!-- Maven Central properties -->
+    <central.sonatype.url>https://central.sonatype.com</central.sonatype.url>
+    <central.serverId>central</central.serverId>
+    <central.deploymentName>arquillian-core-${project.version}</central.deploymentName>
+    <!-- Temporarily keep publishing manual -->
+    <central.autoPublish>false</central.autoPublish>
+    <central.waitUntil>validated</central.waitUntil>
+    <central.skipPublishing>false</central.skipPublishing>
 
     <!-- External Deps -->
     <version.shrinkwrap_shrinkwrap>1.2.6</version.shrinkwrap_shrinkwrap>
@@ -159,21 +177,35 @@
       </modules>
     </profile>
     <profile>
-      <id>release</id>
+      <id>central-release</id>
       <modules>
         <module>integration-tests</module>
       </modules>
+
+      <distributionManagement>
+        <snapshotRepository>
+          <id>${central.serverId}</id>
+          <url>${central.sonatype.url}</url>
+        </snapshotRepository>
+        <repository>
+          <id>${central.serverId}</id>
+          <url>${central.sonatype.url}</url>
+        </repository>
+      </distributionManagement>
+
       <build>
         <plugins>
           <plugin>
-            <artifactId>maven-release-plugin</artifactId>
-            <inherited>true</inherited>
-            <configuration>
-              <pushChanges>false</pushChanges>
-              <localCheckout>true</localCheckout>
-              <preparationGoals>clean install</preparationGoals>
-              <arguments>-DskipItTests=true</arguments>
-            </configuration>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
           </plugin>
           <plugin>
             <artifactId>maven-javadoc-plugin</artifactId>
@@ -193,7 +225,7 @@
               <author>true</author>
               <keywords>true</keywords>
               <additionalOptions>
-                <additionalOption>-sourceclasspath  ${project.build.outputDirectory}</additionalOption>
+                <additionalOption>-sourceclasspath ${project.build.outputDirectory}</additionalOption>
               </additionalOptions>
               <stylesheetfile>${project.parent.parent.basedir}/javadoc/stylesheet.css</stylesheetfile>
               <javadocDirectory>${project.parent.parent.basedir}/javadoc</javadocDirectory>
@@ -206,6 +238,31 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>${version.central.publishing.maven.plugin}</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>${central.serverId}</publishingServerId>
+              <autoPublish>${central.autoPublish}</autoPublish>
+              <waitUntil>${central.waitUntil}</waitUntil>
+              <deploymentName>${central.deploymentName}</deploymentName>
+              <skipPublishing>${central.skipPublishing}</skipPublishing>
+            </configuration>
           </plugin>
         </plugins>
       </build>
