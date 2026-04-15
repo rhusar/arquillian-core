@@ -61,6 +61,10 @@ public class JUnitJupiterRepeatedTestCase extends JUnitTestBaseClass {
         Assertions.assertEquals(0, result.getTestsSkippedCount());
         assertCycle(1, Cycle.BEFORE_CLASS, Cycle.AFTER_CLASS);
         assertCycle(3, Cycle.BEFORE, Cycle.TEST, Cycle.AFTER);
+
+        // Verify adapter.before()/after() are called exactly once per repetition, not doubled
+        verify(adaptor, times(3)).before(any(Object.class), any(Method.class), any(LifecycleMethodExecutor.class));
+        verify(adaptor, times(3)).after(any(Object.class), any(Method.class), any(LifecycleMethodExecutor.class));
     }
 
     public static class TestExecuteLifecycle extends ExecuteLifecycle {

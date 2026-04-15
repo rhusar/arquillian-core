@@ -19,7 +19,10 @@ package org.jboss.arquillian.junit5.container;
 import static org.jboss.arquillian.junit5.container.JUnitTestBaseClass.Cycle;
 import static org.jboss.arquillian.junit5.container.JUnitTestBaseClass.wasCalled;
 
+import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit5.ArquillianExtension;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,6 +35,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
  */
 @ExtendWith(ArquillianExtension.class)
 public class ClassWithArquillianExtensionAndRepeatedTest {
+
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class, "test.jar");
+    }
 
     @BeforeAll
     public static void beforeClass() throws Throwable {
