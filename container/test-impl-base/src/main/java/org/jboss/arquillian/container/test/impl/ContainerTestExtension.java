@@ -31,6 +31,7 @@ import org.jboss.arquillian.container.test.impl.client.deployment.tool.ArchiveDe
 import org.jboss.arquillian.container.test.impl.client.protocol.ProtocolRegistryCreator;
 import org.jboss.arquillian.container.test.impl.client.protocol.local.LocalProtocol;
 import org.jboss.arquillian.container.test.impl.deployment.ArquillianDeploymentAppender;
+import org.jboss.arquillian.container.test.impl.deployment.AssertJDeploymentAppender;
 import org.jboss.arquillian.container.test.impl.enricher.resource.ContainerControllerProvider;
 import org.jboss.arquillian.container.test.impl.enricher.resource.DeployerProvider;
 import org.jboss.arquillian.container.test.impl.enricher.resource.InitialContextProvider;
@@ -74,8 +75,13 @@ public class ContainerTestExtension implements LoadableExtension {
 
         // End -> Copied from TestExtension
 
-        builder.service(AuxiliaryArchiveAppender.class, ArquillianDeploymentAppender.class)
-            .service(TestEnricher.class, ArquillianResourceTestEnricher.class)
+        builder.service(AuxiliaryArchiveAppender.class, ArquillianDeploymentAppender.class);
+
+        if (Validate.classExists("org.assertj.core.api.Assertions")) {
+            builder.service(AuxiliaryArchiveAppender.class, AssertJDeploymentAppender.class);
+        }
+
+        builder.service(TestEnricher.class, ArquillianResourceTestEnricher.class)
             .service(Protocol.class, LocalProtocol.class)
             .service(CommandService.class, LocalCommandService.class)
             .service(ResourceProvider.class, URLResourceProvider.class)
